@@ -9,11 +9,11 @@ ALL_FILES = []
 
 bot = Bot(token=getenv('TOKEN'))
 dp = Dispatcher(bot)
-db = Database()
+db = Database(bot)
 
-def load_ini():
-    global ALL_FILES
-    with open(PATH, 'r', encoding='UTF-8') as file:
-        data = file.readlines()
-    for entry in data:
-        ALL_FILES.append(entry.strip())
+# def load_ini():
+#     global ALL_FILES
+#     with open(PATH, 'r', encoding='UTF-8') as file:
+#         data = file.readlines()
+#     for entry in data:
+#         ALL_FILES.append(entry.strip())

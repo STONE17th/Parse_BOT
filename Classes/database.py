@@ -1,11 +1,14 @@
 import sqlite3
 
+from aiogram.types import CallbackQuery
+
 from .vacancy import CompanyVacancy
 
 
 class Database:
-    def __init__(self, db_path: str = 'DataBase/parse_bot_db.db'):
+    def __init__(self, main_bot, db_path: str = 'DataBase/parse_bot_db.db'):
         self.db_path = db_path
+        self.bot = main_bot
 
     @property
     def connection(self):
@@ -29,24 +32,31 @@ class Database:
     def create_tables_list(self):
         sql = '''CREATE TABLE IF NOT EXISTS tables_list 
                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                company TEXT, table_name TEXT, parse_time TEXT, active TEXT)'''
+                company TEXT, table_name TEXT, parse_time TEXT, active INTEGER)'''
         self.execute(sql, commit=True)
         sql = '''CREATE UNIQUE INDEX IF NOT EXISTS company ON tables_list (company)'''
         self.execute(sql, commit=True)
 
-    def create_table(self, company: str, table: str, parse_time: str):
+    def create_table(self, file: CompanyVacancy):
+        company, table, parse_time = file.database()
         sql = f'''CREATE TABLE IF NOT EXISTS {table} 
         (id INTEGER PRIMARY KEY AUTOINCREMENT, position TEXT, url TEXT)'''
         self.execute(sql, commit=True)
-        sql = '''REPLACE INTO tables_list (company, table_name, parse_time) VALUES (?, ?, ?)'''
-        self.execute(sql, (company, table, parse_time), commit=True)
+        sql = f'''CREATE UNIQUE INDEX IF NOT EXISTS position ON {table} (position, url)'''
+        self.execute(sql, commit=True)
+        sql = '''REPLACE INTO tables_list (company, table_name, parse_time, active) 
+        VALUES (?, ?, ?, ?)'''
+        self.execute(sql, (company, table, parse_time, 1), commit=True)
 
-    def fill_table(self, base: CompanyVacancy):
-        company, table, parse_time = base.database()
-        self.create_table(company, table, parse_time)
+    async def update(self, base: CompanyVacancy, call: CallbackQuery):
+        # company, table, parse_time = base.database()
+        # self.create_table(base)
+        i = 0
+        await self.bot.edit_message_text(text=f'Начали обход {base.company}', chat_id=call.message.chat.id,
+                                         message_id=call.message.message_id)
         for vacancy in base.vacancies:
             position, url = vacancy.extract()
-            sql = f'''INSERT INTO {table} (position, url) 
+            sql = f'''REPLACE INTO {base.table} (position, url) 
                     VALUES (?, ?)'''
             self.execute(sql, (position, url), commit=True)
 
@@ -63,11 +73,20 @@ class Database:
                              "name": vacancy.position,
                              "url": vacancy.url}
                 result.append(new_entry)
-        return CompanyVacancy(result)
+        return result
 
     def company_list(self) -> list:
         sql = '''SELECT * FROM tables_list'''
         return self.execute(sql, fetchall=True)
+
+    def active_company(self) -> list:
+        sql = '''SELECT table_name FROM tables_list WHERE active = 1'''
+        return self.execute(sql, fetchall=True)
+
+    def switch_active(self, name):
+        sql = f'''UPDATE tables_list SET active = CASE WHEN active = 1
+        THEN 0 ELSE 1 END WHERE company=?'''
+        self.execute(sql, (name,), commit=True)
 
     @staticmethod
     def extract_kwargs(sql, parameters: dict) -> tuple:

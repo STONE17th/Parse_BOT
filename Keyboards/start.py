@@ -5,8 +5,8 @@ from .callback_data import menu
 
 def kb_start():
     keyboard = InlineKeyboardMarkup()
-    btn_refresh = iKB(text='Запустить все!', callback_data=menu.new(name='start', button='start'))
-    btn_settings = iKB(text='Выбрать биржи', callback_data=menu.new(name='start', button='start'))
+    btn_refresh = iKB(text='Запустить все!', callback_data=menu.new(name='link', button='all'))
+    btn_settings = iKB(text='Выбрать...', callback_data=menu.new(name='settings', button='settings'))
     keyboard.add(btn_refresh)
     keyboard.add(btn_settings)
     return keyboard
