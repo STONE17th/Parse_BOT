@@ -1,6 +1,5 @@
 import json
 
-from DataBase import all_files
 from Classes import CompanyVacancy
 from loader import db
 
