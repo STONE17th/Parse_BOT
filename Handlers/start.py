@@ -15,7 +15,6 @@ async def start_com(message: Message | CallbackQuery):
     company_list = db.company_list()
     caption = [f'{cmp[1]}\t\t| {cmp[3]}' for cmp in company_list]
     caption = '\n'.join(caption)
-    # caption = 'Главное меню'
     if isinstance(message, Message):
         await message.answer(text=caption, reply_markup=kb_start())
     else:
@@ -30,7 +29,7 @@ async def install_com(message: Message):
     for n, path in enumerate(files.values(), 1):
         with open(path, 'r', encoding='UTF-8') as file:
             data = json.load(file)
-        await db.update(CompanyVacancy(data))
+        await db.update(CompanyVacancy(data), message)
         count = f'{n}/{len(files)}\n'
         await message.answer(count + f'База {data[0].get("company")} загружена')
     await message.answer('Загрузка завершена!')

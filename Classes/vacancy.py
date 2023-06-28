@@ -6,14 +6,6 @@ class Vacancy:
     def extract(self):
         return self.position, self.url
 
-    # def to_dict(self, entry):
-    #     return {
-    #     "company": "Epam",
-    #     "parse_time": "2023.05.20 - 16:41",
-    #     "name": "Meddium Systems Engineer (Microsoft Azure)",
-    #     "url": "https://www.epam.com/careers/job-listings/job.8809000.senior-systems-engineer-microsoft-azure_georgia"
-    # },
-
     def __str__(self):
         return f'{self.position}\n{self.url}\n'
 

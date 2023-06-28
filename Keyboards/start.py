@@ -12,11 +12,6 @@ def kb_start():
     return keyboard
 
 
-
-
-
-
-
 def kb_settings():
     company_list = db.company_list()
     keyboard = InlineKeyboardMarkup()

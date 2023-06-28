@@ -1,6 +1,7 @@
 import sqlite3
 
 from aiogram.types import CallbackQuery
+from aiogram import Bot
 
 from .vacancy import CompanyVacancy
 
@@ -8,7 +9,7 @@ from .vacancy import CompanyVacancy
 class Database:
     def __init__(self, main_bot, db_path: str = 'DataBase/parse_bot_db.db'):
         self.db_path = db_path
-        self.bot = main_bot
+        self.bot: Bot = main_bot
 
     @property
     def connection(self):
@@ -49,11 +50,13 @@ class Database:
         self.execute(sql, (company, table, parse_time, 1), commit=True)
 
     async def update(self, base: CompanyVacancy, call: CallbackQuery):
-        # company, table, parse_time = base.database()
-        # self.create_table(base)
-        i = 0
-        await self.bot.edit_message_text(text=f'Начали обход {base.company}', chat_id=call.message.chat.id,
-                                         message_id=call.message.message_id)
+        chat_id = call.message.chat.id if isinstance(call, CallbackQuery) else call.chat.id
+        message_id = call.message.message_id if isinstance(call, CallbackQuery) else call.message_id
+        if isinstance(call, CallbackQuery):
+            await self.bot.edit_message_text(text=f'Начали обход {base.company}', chat_id=chat_id,
+                                             message_id=message_id)
+        else:
+            await self.bot.send_message(text=f'Начали обход {base.company}', chat_id=chat_id)
         for vacancy in base.vacancies:
             position, url = vacancy.extract()
             sql = f'''REPLACE INTO {base.table} (position, url) 
