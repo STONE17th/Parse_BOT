@@ -33,3 +33,8 @@ async def install_com(message: Message):
         count = f'{n}/{len(files)}\n'
         await message.answer(count + f'База {data[0].get("company")} загружена')
     await message.answer('Загрузка завершена!')
+
+
+@dp.message_handler(commands=['my_id'])
+async def my_id(message: Message):
+    print(message.from_user.id)

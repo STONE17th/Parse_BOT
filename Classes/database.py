@@ -63,6 +63,10 @@ class Database:
                     VALUES (?, ?)'''
             self.execute(sql, (position, url), commit=True)
 
+    async def archive(self, vacancy: dict):
+        sql = f'''REPLACE INTO table_{vacancy.get('company')} (position, url) VALUES (?, ?)'''
+        self.execute(sql, (vacancy.get('name'), vacancy.get('url')), commit=True)
+
     def check_new(self, base: CompanyVacancy):
         company, table, parse_time = base.database()
         result = []
