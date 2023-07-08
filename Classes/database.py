@@ -32,22 +32,20 @@ class Database:
 
     def create_tables_list(self):
         sql = '''CREATE TABLE IF NOT EXISTS tables_list 
-                (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                company TEXT, table_name TEXT, parse_time TEXT, active INTEGER)'''
+                (id INTEGER PRIMARY KEY AUTOINCREMENT, company TEXT, table_name TEXT, active INTEGER)'''
         self.execute(sql, commit=True)
         sql = '''CREATE UNIQUE INDEX IF NOT EXISTS company ON tables_list (company)'''
         self.execute(sql, commit=True)
 
-    def create_table(self, file: CompanyVacancy):
-        company, table, parse_time = file.database()
-        sql = f'''CREATE TABLE IF NOT EXISTS {table} 
-        (id INTEGER PRIMARY KEY AUTOINCREMENT, position TEXT, url TEXT)'''
+    def create_table(self, company: str):
+        sql = f'''CREATE TABLE IF NOT EXISTS table_{company} 
+        (id INTEGER PRIMARY KEY AUTOINCREMENT, position TEXT, url TEXT, parse_time TEXT)'''
         self.execute(sql, commit=True)
-        sql = f'''CREATE UNIQUE INDEX IF NOT EXISTS position ON {table} (position, url)'''
+        sql = f'''CREATE UNIQUE INDEX IF NOT EXISTS position ON table_{company} (position, url)'''
         self.execute(sql, commit=True)
-        sql = '''REPLACE INTO tables_list (company, table_name, parse_time, active) 
+        sql = '''REPLACE INTO tables_list (company, table_name, active) 
         VALUES (?, ?, ?, ?)'''
-        self.execute(sql, (company, table, parse_time, 1), commit=True)
+        self.execute(sql, (company, f'table_{company}', 1), commit=True)
 
     async def update(self, base: CompanyVacancy, call: CallbackQuery):
         chat_id = call.message.chat.id if isinstance(call, CallbackQuery) else call.chat.id
@@ -63,7 +61,7 @@ class Database:
                     VALUES (?, ?)'''
             self.execute(sql, (position, url), commit=True)
 
-    async def archive(self, vacancy: dict):
+    def archive(self, vacancy: dict):
         sql = f'''REPLACE INTO table_{vacancy.get('company')} (position, url) VALUES (?, ?)'''
         self.execute(sql, (vacancy.get('name'), vacancy.get('url')), commit=True)
 

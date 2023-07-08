@@ -5,7 +5,6 @@ from aiogram.types import Message, CallbackQuery
 from loader import bot, dp, db
 from Keyboards import kb_start
 from Keyboards.callback_data import menu
-from DataBase.JSON import files
 from Classes import CompanyVacancy
 
 
