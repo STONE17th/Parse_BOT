@@ -5,8 +5,8 @@ from aiogram.types import Message, CallbackQuery
 from loader import bot, dp, db
 from Keyboards import kb_start
 from Keyboards.callback_data import menu
-from Classes import CompanyVacancy
-
+from DataBase.sqla import Vacancies
+from Parser.app import outside_crutch
 
 @dp.callback_query_handler(menu.filter(name='start'))
 @dp.message_handler(commands=['start'])
@@ -23,15 +23,16 @@ async def start_com(message: Message | CallbackQuery):
 
 
 @dp.message_handler(commands=['install'])
-async def install_com(message: Message):
-    await message.answer('Начинаем экспорт в DB...')
-    for n, path in enumerate(files.values(), 1):
-        with open(path, 'r', encoding='UTF-8') as file:
-            data = json.load(file)
-        await db.update(CompanyVacancy(data), message)
-        count = f'{n}/{len(files)}\n'
-        await message.answer(count + f'База {data[0].get("company")} загружена')
-    await message.answer('Загрузка завершена!')
+def install_com(message: Message):
+    base_db = outside_crutch()
+    for company in base_db.values():
+        for vacancy in company:
+            # print(i['company'], i['name'], i['url'], i['parse_time'])
+            sdb.add((Vacancies(company=vacancy['company'],
+                               name=vacancy['name'],
+                               url=vacancy['url'],
+                               parse_time=vacancy['parse_time'],
+                               status=0)))
 
 
 @dp.message_handler(commands=['my_id'])

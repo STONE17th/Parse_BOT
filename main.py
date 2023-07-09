@@ -5,10 +5,14 @@ from datetime import datetime
 from aiogram.utils import executor
 from Handlers import dp
 from loader import db
-from Classes import CompanyVacancy
-from vac_search import get_list_of_companies
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 DELAY = 10
+
+db = create_engine('sqlite:///DataBase/vac_db.db')
+session = sessionmaker(bind=db)
+sdb = session()
 
 
 async def on_start(_):
